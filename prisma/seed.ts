@@ -1,6 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 import dayjs from "dayjs";
 import { DrivenResortRooms, DrivenPalaceRooms, DrivenWorldRooms } from "./seedHelper";
+import { day22JanuaryActivity, day23JanuaryActivity, day24JanuaryActivity } from "./seedHelper";
 const prisma = new PrismaClient();
 
 async function main() {
@@ -9,6 +10,8 @@ async function main() {
   await seedTicketTypes();
   await seedHotels();
   await seedRooms();
+  await seedLocalizations();
+  await seedActivities();
 }
 
 async function cleanDb() {
@@ -23,6 +26,9 @@ async function cleanDb() {
   await prisma.ticketType.deleteMany({});
   await prisma.enrollment.deleteMany({});
   await prisma.user.deleteMany({});
+  await prisma.activityTicket.deleteMany({});
+  await prisma.activity.deleteMany({});
+  await prisma.localization.deleteMany({});
 }
 
 async function seedEvent() {
@@ -97,6 +103,37 @@ async function seedRooms() {
   });
   await prisma.room.createMany({
     data: DrivenWorldRooms,
+  });
+}
+
+async function seedLocalizations() {
+  await prisma.localization.createMany({
+    data: [
+      {
+        id: 1,
+        name: "Auditório Principal",
+      },
+      {
+        id: 2,
+        name: "Auditório Lateral",
+      },
+      {
+        id: 3,
+        name: "Sala de Workshop",
+      },
+    ],
+  });
+}
+
+async function seedActivities() {
+  await prisma.activity.createMany({
+    data: day22JanuaryActivity,
+  });
+  await prisma.activity.createMany({
+    data: day23JanuaryActivity,
+  });
+  await prisma.activity.createMany({
+    data: day24JanuaryActivity,
   });
 }
 
