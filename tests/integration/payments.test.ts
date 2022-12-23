@@ -83,6 +83,18 @@ describe("GET /payments", () => {
       expect(response.status).toEqual(httpStatus.UNAUTHORIZED);
     });
 
+    it("should respond with status 404 when user has a not paid ticket", async () => {
+      const user = await createUser();
+      const token = await generateValidToken(user);
+      const enrollment = await createEnrollmentWithAddress(user);
+      const ticketType = await createTicketType();
+      const ticket = await createTicket(enrollment.id, ticketType.id, TicketStatus.RESERVED);
+
+      const response = await server.get(`/payments?ticketId=${ticket.id}`).set("Authorization", `Bearer ${token}`);
+
+      expect(response.status).toEqual(httpStatus.NOT_FOUND);
+    });
+
     it("should respond with status 200 and with payment data", async () => {
       const user = await createUser();
       const token = await generateValidToken(user);

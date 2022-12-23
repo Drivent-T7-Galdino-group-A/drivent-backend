@@ -5,6 +5,20 @@ import { User } from "@prisma/client";
 import { createUser } from "./users-factory";
 import { prisma } from "@/config";
 
+export async function createEnrollmentWithoutAddress(user?: User) {
+  const incomingUser = user || (await createUser());
+
+  return prisma.enrollment.create({
+    data: {
+      name: faker.name.findName(),
+      cpf: generateCPF(),
+      birthday: faker.date.past(),
+      phone: faker.phone.phoneNumber("(##) 9####-####"),
+      userId: incomingUser.id,
+    },
+  });
+}
+
 export async function createEnrollmentWithAddress(user?: User) {
   const incomingUser = user || (await createUser());
 

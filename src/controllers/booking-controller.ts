@@ -32,7 +32,7 @@ export async function bookingRoom(req: AuthenticatedRequest, res: Response) {
       bookingId: booking.id,
     });
   } catch (error) {
-    if (error.name === "CannotBookingError") {
+    if (error.name === "CannotBookingError" || error.name === "ConflictError") {
       return res.sendStatus(httpStatus.FORBIDDEN);
     }
     return res.sendStatus(httpStatus.NOT_FOUND);
