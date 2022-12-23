@@ -1,7 +1,7 @@
 import activityRepository from "@/repositories/activity-repository";
 import enrollmentRepository from "@/repositories/enrollment-repository";
 import ticketRepository from "@/repositories/ticket-repository";
-import { notFoundError, unauthorizedError } from "@/errors";
+import { cannotListActivitiesError, notFoundError } from "@/errors";
 
 async function checkEnrollmentAndTicket(userId: number) {
   const enrollment = await enrollmentRepository.findWithAddressByUserId(userId);
@@ -11,7 +11,7 @@ async function checkEnrollmentAndTicket(userId: number) {
 
   const ticket = await ticketRepository.findTicketByEnrollmentId(enrollment.id);
   if (!ticket || ticket.status === "RESERVED" || ticket.TicketType.isRemote) {
-    throw unauthorizedError();
+    throw cannotListActivitiesError();
   }
 }
 
