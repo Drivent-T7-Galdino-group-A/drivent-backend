@@ -6,7 +6,7 @@ import dayjs from "dayjs";
 import httpStatus from "http-status";
 import * as jwt from "jsonwebtoken";
 import supertest from "supertest";
-import { createEnrollmentWithAddress, createUser, createhAddressWithCEP } from "../factories";
+import { createEnrollmentWithAddress, createEnrollmentWithoutAddress, createUser, createhAddressWithCEP } from "../factories";
 import { cleanDb, generateValidToken } from "../helpers";
 
 beforeAll(async () => {
@@ -49,7 +49,24 @@ describe("GET /enrollments", () => {
       expect(response.status).toBe(httpStatus.NOT_FOUND);
     });
 
-    it("should respond with status 200 and enrollment data with address when there is a enrollment for given user", async () => {
+    it("should respond with status 200 and enrollment data without address when there is an enrollment without address for given user", async () => {
+      const user = await createUser();
+      const enrollment = await createEnrollmentWithoutAddress(user);
+      const token = await generateValidToken(user);
+
+      const response = await server.get("/enrollments").set("Authorization", `Bearer ${token}`);
+
+      expect(response.status).toBe(httpStatus.OK);
+      expect(response.body).toEqual({
+        id: enrollment.id,
+        name: enrollment.name,
+        cpf: enrollment.cpf,
+        birthday: enrollment.birthday.toISOString(),
+        phone: enrollment.phone,
+      });
+    });
+
+    it("should respond with status 200 and enrollment data with address when there is an enrollment and address for given user", async () => {
       const user = await createUser();
       const enrollment = await createEnrollmentWithAddress(user);
       const token = await generateValidToken(user);
