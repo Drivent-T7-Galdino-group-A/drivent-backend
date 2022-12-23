@@ -1,4 +1,4 @@
-import { cannotBookingError, notFoundError } from "@/errors";
+import { cannotBookingError, conflictError, notFoundError } from "@/errors";
 import roomRepository from "@/repositories/room-repository";
 import bookingRepository from "@/repositories/booking-repository";
 import enrollmentRepository from "@/repositories/enrollment-repository";
@@ -13,6 +13,14 @@ async function checkEnrollmentTicket(userId: number) {
 
   if (!ticket || ticket.status === "RESERVED" || ticket.TicketType.isRemote || !ticket.TicketType.includesHotel) {
     throw cannotBookingError();
+  }
+}
+
+async function checkExistentBooking(userId: number) {
+  const booking = await bookingRepository.findByUserId(userId);
+
+  if(booking) {
+    throw conflictError("It is not possible booking more than 1 room!");
   }
 }
 
@@ -40,6 +48,7 @@ async function getBooking(userId: number) {
 async function bookingRoomById(userId: number, roomId: number) {
   await checkEnrollmentTicket(userId);
   await checkValidBooking(roomId);
+  await checkExistentBooking(userId);
 
   return bookingRepository.create({ roomId, userId });
 }
