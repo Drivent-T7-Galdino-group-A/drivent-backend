@@ -35,6 +35,9 @@ export async function postCreateActivity(req: AuthenticatedRequest, res: Respons
   } catch (error) {
     if (error.name === "ConflictError" || error.name === "CannotBookActivityError") {
       return res.status(httpStatus.FORBIDDEN).send(error.message);
+    }
+  }
+}
 
 export async function getActivitiesByDate(req: AuthenticatedRequest, res: Response) {
   const { userId } = req;

@@ -8,7 +8,7 @@ const activitiesRouter = Router();
 activitiesRouter
   .all("/*", authenticateToken)
   .get("/", getActivities)
+  .get("/date/:date", validateParams(ActivitiesByDateSchema), getActivitiesByDate)
   .post("/", postCreateActivity);
-  .get("/date/:date", validateParams(ActivitiesByDateSchema), getActivitiesByDate);
 
 export { activitiesRouter };
