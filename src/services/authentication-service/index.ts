@@ -4,7 +4,6 @@ import { exclude } from "@/utils/prisma-utils";
 import { User } from "@prisma/client";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import userService from "../users-service";
 import { invalidCredentialsError } from "./errors";
 
 async function signIn(params: SignInParams): Promise<SignInResult> {
@@ -28,7 +27,7 @@ async function signInWithGithub(params: SignInWithIdSessionParams) {
   let user = await userRepository.findByEmail(email, { id: true, email: true, password: true });
 
   if (!user) {
-    user = await userService.createUser({ email, password: `${idSession}` });
+    user = await createUser({ email, idSession });
   }
 
   const token = await createSession(user.id);
@@ -40,6 +39,15 @@ async function signInWithGithub(params: SignInWithIdSessionParams) {
     },
     token,
   };
+}
+
+async function createUser({ email, idSession }: SignInWithIdSessionParams): Promise<User> {
+  const hashedPassword = await bcrypt.hash(idSession, 12);
+
+  return userRepository.create({
+    email,
+    password: hashedPassword,
+  });
 }
 
 async function getUserOrFail(email: string): Promise<GetUserOrFailResult> {
