@@ -26,9 +26,6 @@ async function getActivitiesByDate(userId: number, date: string) {
   await checkEnrollmentAndTicket(userId);
 
   const activitiesOnDate = await activityRepository.findActivitiesByDate(date);
-  if(!activitiesOnDate) {
-    throw notFoundError();
-  }
 
   return activitiesOnDate;
 }
