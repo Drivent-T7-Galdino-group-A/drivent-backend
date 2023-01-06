@@ -1,7 +1,7 @@
 import activityRepository from "@/repositories/activity-repository";
 import enrollmentRepository from "@/repositories/enrollment-repository";
 import ticketRepository from "@/repositories/ticket-repository";
-import { cannotListActivitiesError, notFoundError, conflictError } from "@/errors";
+import { cannotListActivitiesError, notFoundError, conflictError, cannotBookActivityError } from "@/errors";
 
 async function checkEnrollmentAndTicket(userId: number) {
   const enrollment = await enrollmentRepository.findWithAddressByUserId(userId);
@@ -27,11 +27,16 @@ async function getActivities(userId: number) {
 async function createActivity(userId: number, activityId: number) {
   const ticketId: number = await checkEnrollmentAndTicket(userId);
 
+  const activityTickets = await activityRepository.findActivityTickets(activityId);
+  const currentActivity = await activityRepository.findActivityById(activityId);
+
+  if (currentActivity.capacity <= activityTickets?.length) {
+    throw cannotBookActivityError();
+  }
+
   const userActivities = await activityRepository.findUserActivities(ticketId);
 
   if (userActivities.length > 0) {
-    const currentActivity = await activityRepository.findActivityById(activityId);
-
     for (let i = 0; i < userActivities.length; i++) {
       if (
         currentActivity.date.getDate() === userActivities[i].Activity.date.getDate() &&

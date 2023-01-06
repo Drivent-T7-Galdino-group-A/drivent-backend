@@ -33,7 +33,7 @@ export async function postCreateActivity(req: AuthenticatedRequest, res: Respons
 
     return res.sendStatus(httpStatus.CREATED);
   } catch (error) {
-    if (error.name === "ConflictError") {
+    if (error.name === "ConflictError" || error.name === "CannotBookActivityError") {
       return res.status(httpStatus.FORBIDDEN).send(error.message);
     }
     return res.sendStatus(httpStatus.BAD_REQUEST);

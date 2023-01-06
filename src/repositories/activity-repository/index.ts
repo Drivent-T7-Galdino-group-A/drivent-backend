@@ -24,6 +24,10 @@ async function findUserActivities(ticketId: number) {
   return prisma.activityTicket.findMany({ where: { ticketId }, include: { Activity: true } });
 }
 
+async function findActivityTickets(activityId: number) {
+  return prisma.activityTicket.findMany({ where: { activityId } });
+}
+
 async function createActivity(ticketId: number, activityId: number) {
   return prisma.activityTicket.create({ data: { ticketId, activityId } });
 }
@@ -32,6 +36,7 @@ const activityRepository = {
   findActivities,
   findActivityById,
   findUserActivities,
+  findActivityTickets,
   createActivity,
 };
 
