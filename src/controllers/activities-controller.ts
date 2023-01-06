@@ -20,6 +20,25 @@ export async function getActivities(req: AuthenticatedRequest, res: Response) {
   }
 }
 
+export async function postCreateActivity(req: AuthenticatedRequest, res: Response) {
+  const { userId } = req;
+  const { activityId } = req.body;
+
+  if (!activityId) {
+    return res.sendStatus(httpStatus.BAD_REQUEST);
+  }
+
+  try {
+    await activitiesService.createActivity(Number(userId), Number(activityId));
+
+    return res.sendStatus(httpStatus.CREATED);
+  } catch (error) {
+    if (error.name === "ConflictError" || error.name === "CannotBookActivityError") {
+      return res.status(httpStatus.FORBIDDEN).send(error.message);
+    }
+  }
+}
+
 export async function getActivitiesByDate(req: AuthenticatedRequest, res: Response) {
   const { userId } = req;
   const { date } = req.params;
