@@ -144,6 +144,8 @@ model Activity {
   updatedAt      DateTime         @default(now()) @db.Timestamp(6)
   Localization   Localization     @relation(fields: [localizationId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "Activity_fk0")
   ActivityTicket ActivityTicket[]
+
+  @@index([date])
 }
 
 model ActivityTicket {
