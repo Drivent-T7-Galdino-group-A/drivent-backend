@@ -46,9 +46,19 @@ async function createActivity(userId: number, activityId: number) {
   await activityRepository.createActivity(ticketId, activityId);
 }
 
+async function getActivitiesByDate(userId: number, date: string) {
+  await checkEnrollmentAndTicket(userId);
+
+  const activitiesOnDate = await activityRepository.findActivitiesByDate(date);
+
+  return activitiesOnDate;
+}
+
 const activitiesService = {
+  checkEnrollmentAndTicket,
   getActivities,
   createActivity,
+  getActivitiesByDate,
 };
 
 export default activitiesService;

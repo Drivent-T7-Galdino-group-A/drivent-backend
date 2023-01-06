@@ -35,6 +35,20 @@ export async function postCreateActivity(req: AuthenticatedRequest, res: Respons
   } catch (error) {
     if (error.name === "ConflictError") {
       return res.status(httpStatus.FORBIDDEN).send(error.message);
+
+export async function getActivitiesByDate(req: AuthenticatedRequest, res: Response) {
+  const { userId } = req;
+  const { date } = req.params;
+
+  try {
+    const activitiesOnDate = await activitiesService.getActivitiesByDate(userId, date);
+    return res.status(httpStatus.OK).send(activitiesOnDate);
+  } catch (error) {
+    if (error.name === "NotFoundError") {
+      return res.sendStatus(httpStatus.NOT_FOUND);
+    }
+    if (error.name === "cannotListActivitiesError") {
+      return res.sendStatus(httpStatus.PAYMENT_REQUIRED);
     }
     return res.sendStatus(httpStatus.BAD_REQUEST);
   }
