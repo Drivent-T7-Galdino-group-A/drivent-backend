@@ -16,8 +16,25 @@ async function findActivities() {
   });
 }
 
+async function findActivitiesByDate(date: string) {
+  return prisma.activity.findMany({
+    where: {
+      date,
+    },
+    include: {
+      Localization: {
+        select: {
+          id: true,
+          name: true,
+        },
+      },
+    },
+  });
+}
+
 const activityRepository = {
   findActivities,
+  findActivitiesByDate,
 };
 
 export default activityRepository;
