@@ -34,6 +34,7 @@ async function getActivitiesByDate(userId: number, date: string) {
 }
 
 const activitiesService = {
+  checkEnrollmentAndTicket,
   getActivities,
   getActivitiesByDate,
 };
