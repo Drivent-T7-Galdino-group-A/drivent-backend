@@ -16,8 +16,23 @@ async function findActivities() {
   });
 }
 
+async function findActivityById(activityId: number) {
+  return prisma.activity.findFirst({ where: { id: activityId } });
+}
+
+async function findUserActivities(ticketId: number) {
+  return prisma.activityTicket.findMany({ where: { ticketId }, include: { Activity: true } });
+}
+
+async function createActivity(ticketId: number, activityId: number) {
+  return prisma.activityTicket.create({ data: { ticketId, activityId } });
+}
+
 const activityRepository = {
   findActivities,
+  findActivityById,
+  findUserActivities,
+  createActivity,
 };
 
 export default activityRepository;

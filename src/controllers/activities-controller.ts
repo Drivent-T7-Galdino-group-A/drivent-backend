@@ -19,3 +19,23 @@ export async function getActivities(req: AuthenticatedRequest, res: Response) {
     return res.sendStatus(httpStatus.BAD_REQUEST);
   }
 }
+
+export async function postCreateActivity(req: AuthenticatedRequest, res: Response) {
+  const { userId } = req;
+  const { activityId } = req.body;
+
+  if (!activityId) {
+    return res.sendStatus(httpStatus.BAD_REQUEST);
+  }
+
+  try {
+    await activitiesService.createActivity(Number(userId), Number(activityId));
+
+    return res.sendStatus(httpStatus.CREATED);
+  } catch (error) {
+    if (error.name === "ConflictError") {
+      return res.status(httpStatus.FORBIDDEN).send(error.message);
+    }
+    return res.sendStatus(httpStatus.BAD_REQUEST);
+  }
+}
