@@ -30,6 +30,20 @@ async function findActivityTickets(activityId: number) {
 
 async function createActivity(ticketId: number, activityId: number) {
   return prisma.activityTicket.create({ data: { ticketId, activityId } });
+async function findActivitiesByDate(date: string) {
+  return prisma.activity.findMany({
+    where: {
+      date,
+    },
+    include: {
+      Localization: {
+        select: {
+          id: true,
+          name: true,
+        },
+      },
+    },
+  });
 }
 
 const activityRepository = {
@@ -38,6 +52,7 @@ const activityRepository = {
   findUserActivities,
   findActivityTickets,
   createActivity,
+  findActivitiesByDate,
 };
 
 export default activityRepository;
