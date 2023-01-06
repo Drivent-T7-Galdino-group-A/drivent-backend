@@ -1,9 +1,10 @@
 import app, { init } from "@/app";
 import faker from "@faker-js/faker";
+import { prisma } from "@prisma/client";
 import httpStatus from "http-status";
 import supertest from "supertest";
-import { createUser } from "../factories";
-import { cleanDb } from "../helpers";
+import { createSession, createUser } from "../factories";
+import { cleanDb, generateValidToken } from "../helpers";
 
 beforeAll(async () => {
   await init();
@@ -80,6 +81,87 @@ describe("POST /auth/sign-in", () => {
         await createUser(body);
 
         const response = await server.post("/auth/sign-in").send(body);
+
+        expect(response.body.token).toBeDefined();
+      });
+    });
+  });
+});
+
+describe("POST /auth/firebase", () => {
+  it("should respond with status 400 when body is not given", async () => {
+    const response = await server.post("/auth/firebase");
+
+    expect(response.status).toBe(httpStatus.BAD_REQUEST);
+  });
+
+  it("should respond with status 400 when body is not valid", async () => {
+    const invalidBody = { [faker.lorem.word()]: faker.lorem.word() };
+
+    const response = await server.post("/auth/firebase").send(invalidBody);
+
+    expect(response.status).toBe(httpStatus.BAD_REQUEST);
+  });
+
+  describe("when body is valid", () => {
+    const generateValidBody = () => ({
+      email: faker.internet.email(),
+      idSession: faker.internet.password(),
+    });
+
+    it("should respond with status 400 if there is a user for given email but password is not correct", async () => {
+      const body = generateValidBody();
+
+      const response = await server.post("/auth/firebase").send({
+        ...body,
+        password: faker.lorem.word(),
+      });
+
+      expect(response.status).toBe(httpStatus.BAD_REQUEST);
+    });
+
+    describe("when credentials are valid", () => {
+      it("should respond with status 200", async () => {
+        const body = generateValidBody();
+        const user = await createUser(body);
+        await generateValidToken(user);
+
+        const response = await server.post("/auth/firebase").send(body);
+
+        expect(response.status).toBe(httpStatus.OK);
+      });
+
+      it("should respond with user data when email doesnt exist", async () => {
+        const body = generateValidBody();
+
+        const response = await server.post("/auth/firebase").send(body);
+
+        expect(response.status).toBe(httpStatus.OK);
+        expect(response.body.user).toEqual({
+          id: expect.any(Number),
+          email: body.email,
+        });
+      });
+
+      it("should respond with user data", async () => {
+        const body = generateValidBody();
+        const user = await createUser(body);
+        await generateValidToken(user);
+
+        const response = await server.post("/auth/firebase").send(body);
+
+        expect(response.body.user).toEqual({
+          id: user.id,
+          email: user.email,
+        });
+      });
+
+      it("should respond with session token", async () => {
+        const body = generateValidBody();
+        const user = await createUser(body);
+        await generateValidToken(user);
+
+        const response = await server.post("/auth/firebase").send(body);
 
         expect(response.body.token).toBeDefined();
       });
