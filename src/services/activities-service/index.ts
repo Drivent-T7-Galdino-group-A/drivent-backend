@@ -22,8 +22,18 @@ async function getActivities(userId: number) {
   return activities;
 }
 
+async function getActivitiesByDate(userId: number, date: string) {
+  await checkEnrollmentAndTicket(userId);
+
+  const activitiesOnDate = await activityRepository.findActivitiesByDate(date);
+
+  return activitiesOnDate;
+}
+
 const activitiesService = {
+  checkEnrollmentAndTicket,
   getActivities,
+  getActivitiesByDate,
 };
 
 export default activitiesService;
