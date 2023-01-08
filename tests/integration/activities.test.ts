@@ -14,7 +14,7 @@ import {
   createHotel,
   createLocalization,
   createActivity,
-  createActivityTicket
+  createActivityTicket,
 } from "../factories";
 import { cleanDb, generateValidToken } from "../helpers";
 
@@ -182,7 +182,7 @@ describe("GET /activities/date/:date", () => {
 
     it("should respond with status 402 when user ticket is remote", async () => {
       const date = faker.date.future().toISOString();
-      
+
       const user = await createUser();
       const token = await generateValidToken(user);
       const enrollment = await createEnrollmentWithAddress(user);
@@ -197,7 +197,7 @@ describe("GET /activities/date/:date", () => {
 
     it("should respond with status 404 when user has no enrollment ", async () => {
       const date = faker.date.future().toISOString();
-      
+
       const user = await createUser();
       const token = await generateValidToken(user);
 
@@ -210,7 +210,7 @@ describe("GET /activities/date/:date", () => {
 
     it("should respond with status 402 when user has no payment yet ", async () => {
       const date = faker.date.future().toISOString();
-      
+
       const user = await createUser();
       const token = await generateValidToken(user);
       const enrollment = await createEnrollmentWithAddress(user);
@@ -225,7 +225,7 @@ describe("GET /activities/date/:date", () => {
 
     it("should respond with status 200 and an empty array when there is no activity", async () => {
       const date = faker.date.future().toISOString();
-      
+
       const user = await createUser();
       const token = await generateValidToken(user);
       const enrollment = await createEnrollmentWithAddress(user);
@@ -298,7 +298,7 @@ describe("GET /activities/date/:date", () => {
   });
 });
 
-describe("GET /activities/tickets", () => {
+describe("GET /activities/tickets/:activityId", () => {
   it("should respond with status 401 if no token is given", async () => {
     const response = await server.get("/activities/tickets");
 
@@ -317,7 +317,7 @@ describe("GET /activities/tickets", () => {
     const userWithoutSession = await createUser();
     const token = jwt.sign({ userId: userWithoutSession.id }, process.env.JWT_SECRET);
 
-    const response = await server.get("/activities/tickets").set("Authorization", `Bearer ${token}`);
+    const response = await server.get("/activities/tickets/1").set("Authorization", `Bearer ${token}`);
 
     expect(response.status).toBe(httpStatus.UNAUTHORIZED);
   });
@@ -331,7 +331,7 @@ describe("GET /activities/tickets", () => {
       const ticket = await createTicket(enrollment.id, ticketType.id, TicketStatus.RESERVED);
       await createPayment(ticket.id, ticketType.price);
 
-      const response = await server.get("/activities/tickets").set("Authorization", `Bearer ${token}`);
+      const response = await server.get("/activities/tickets/1").set("Authorization", `Bearer ${token}`);
 
       expect(response.status).toEqual(httpStatus.PAYMENT_REQUIRED);
     });
@@ -342,7 +342,7 @@ describe("GET /activities/tickets", () => {
 
       const ticketType = await createTicketTypeRemote();
 
-      const response = await server.get("/activities/tickets").set("Authorization", `Bearer ${token}`);
+      const response = await server.get("/activities/tickets/1").set("Authorization", `Bearer ${token}`);
 
       expect(response.status).toEqual(httpStatus.NOT_FOUND);
     });
@@ -355,7 +355,7 @@ describe("GET /activities/tickets", () => {
       await createTicket(enrollment.id, ticketType.id, TicketStatus.RESERVED);
       await createHotel();
 
-      const response = await server.get("/activities/tickets").set("Authorization", `Bearer ${token}`);
+      const response = await server.get("/activities/tickets/1").set("Authorization", `Bearer ${token}`);
 
       expect(response.status).toEqual(httpStatus.PAYMENT_REQUIRED);
     });
@@ -373,9 +373,8 @@ describe("GET /activities/tickets", () => {
       const activityTicket = await createActivityTicket(ticket.id, createdActivity.id);
 
       const response = await server
-        .get("/activities/tickets")
-        .set("Authorization", `Bearer ${token}`)
-        .send({ activityId: createdActivity.id });
+        .get(`/activities/tickets/${activityTicket.activityId}`)
+        .set("Authorization", `Bearer ${token}`);
 
       expect(response.status).toEqual(httpStatus.OK);
 
@@ -398,10 +397,7 @@ describe("GET /activities/tickets", () => {
       const ticket = await createTicket(enrollment.id, ticketType.id, TicketStatus.PAID);
       await createPayment(ticket.id, ticketType.price);
 
-      const response = await server
-        .get("/activities/tickets")
-        .set("Authorization", `Bearer ${token}`)
-        .send({ activityId: 1 });
+      const response = await server.get("/activities/tickets/1").set("Authorization", `Bearer ${token}`);
 
       expect(response.status).toEqual(httpStatus.OK);
       expect(response.body).toEqual([]);
