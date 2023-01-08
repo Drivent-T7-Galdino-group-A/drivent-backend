@@ -21,3 +21,12 @@ export async function createLocalization() {
     },
   });
 }
+
+export async function createActivityTicket(ticketId: number, activityId: number) {
+  return await prisma.activityTicket.create({
+    data: {
+      ticketId,
+      activityId,
+    },
+  });
+}
