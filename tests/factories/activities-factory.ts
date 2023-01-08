@@ -5,11 +5,11 @@ export async function createActivity(localizationId: number) {
   return await prisma.activity.create({
     data: {
       name: faker.name.findName(),
-      capacity: 3,
+      capacity: 2,
       localizationId,
       date: faker.date.future(),
-      startTime: new Date(),
-      endTime: new Date(),
+      startTime: "1970-01-01T10:00:00.174Z",
+      endTime: "1970-01-01T11:00:00.174Z",
     },
   });
 }

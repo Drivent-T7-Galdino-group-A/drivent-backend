@@ -471,6 +471,62 @@ describe("POST /activities", () => {
       expect(response.status).toEqual(httpStatus.PAYMENT_REQUIRED);
     });
 
+    it("should respond with status 403 when there's no more capacity for given activity", async () => {
+      const user = await createUser();
+      const user2 = await createUser();
+      const user3 = await createUser();
+      const token = await generateValidToken(user);
+      const token2 = await generateValidToken(user2);
+      const token3 = await generateValidToken(user3);
+      const enrollment = await createEnrollmentWithAddress(user);
+      const enrollment2 = await createEnrollmentWithAddress(user2);
+      const enrollment3 = await createEnrollmentWithAddress(user3);
+      const ticketType = await createTicketTypeWithHotel();
+      const ticket = await createTicket(enrollment.id, ticketType.id, TicketStatus.PAID);
+      const ticket2 = await createTicket(enrollment2.id, ticketType.id, TicketStatus.PAID);
+      const ticket3 = await createTicket(enrollment3.id, ticketType.id, TicketStatus.PAID);
+      await createPayment(ticket.id, ticketType.price);
+      await createPayment(ticket2.id, ticketType.price);
+      await createPayment(ticket3.id, ticketType.price);
+      const createdLocalization = await createLocalization();
+      const createdActivity = await createActivity(createdLocalization.id);
+
+      await server.post("/activities").set("Authorization", `Bearer ${token}`).send({
+        activityId: createdActivity.id,
+      });
+
+      await server.post("/activities").set("Authorization", `Bearer ${token2}`).send({
+        activityId: createdActivity.id,
+      });
+
+      const response = await server.post("/activities").set("Authorization", `Bearer ${token3}`).send({
+        activityId: createdActivity.id,
+      });
+
+      expect(response.status).toEqual(httpStatus.FORBIDDEN);
+    });
+
+    it("should respond with status 403 when user has another activity booked for given activity time", async () => {
+      const user = await createUser();
+      const token = await generateValidToken(user);
+      const enrollment = await createEnrollmentWithAddress(user);
+      const ticketType = await createTicketTypeWithHotel();
+      const ticket = await createTicket(enrollment.id, ticketType.id, TicketStatus.PAID);
+      await createPayment(ticket.id, ticketType.price);
+      const createdLocalization = await createLocalization();
+      const createdActivity = await createActivity(createdLocalization.id);
+
+      await server.post("/activities").set("Authorization", `Bearer ${token}`).send({
+        activityId: createdActivity.id,
+      });
+
+      const response = await server.post("/activities").set("Authorization", `Bearer ${token}`).send({
+        activityId: createdActivity.id,
+      });
+
+      expect(response.status).toEqual(httpStatus.FORBIDDEN);
+    });
+
     it("should respond with status 201", async () => {
       const user = await createUser();
       const token = await generateValidToken(user);
