@@ -68,12 +68,21 @@ async function getNumberOfEnrollmentsByActivity(userId: number, activityId: numb
   return numberOfActivityTickets;
 }
 
+async function getActivityTickets(userId: number, activityId: number) {
+  await checkEnrollmentAndTicket(userId);
+
+  const activityTickets = await activityRepository.findActivityTickets(activityId);
+
+  return activityTickets;
+}
+
 const activitiesService = {
   checkEnrollmentAndTicket,
   getActivities,
   createActivity,
   getActivitiesByDate,
   getNumberOfEnrollmentsByActivity,
+  getActivityTickets
 };
 
 export default activitiesService;
