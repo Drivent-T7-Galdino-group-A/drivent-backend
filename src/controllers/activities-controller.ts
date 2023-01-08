@@ -66,7 +66,7 @@ export async function getActivitiesByDate(req: AuthenticatedRequest, res: Respon
 
 export async function getActivityTickets(req: AuthenticatedRequest, res: Response) {
   const { userId } = req;
-  const { activityId } = req.body;
+  const { activityId } = req.params;
 
   try {
     const activityTickets = await activitiesService.getActivityTickets(Number(userId), Number(activityId));

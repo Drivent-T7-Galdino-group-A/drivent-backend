@@ -9,7 +9,7 @@ activitiesRouter
   .all("/*", authenticateToken)
   .get("/", getActivities)
   .get("/date/:date", validateParams(ActivitiesByDateSchema), getActivitiesByDate)
-  .get("/tickets", getActivityTickets)
+  .get("/tickets/:activityId", getActivityTickets)
   .post("/", postCreateActivity);
 
 export { activitiesRouter };
