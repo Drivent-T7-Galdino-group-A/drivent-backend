@@ -66,9 +66,9 @@ export async function getActivitiesByDate(req: AuthenticatedRequest, res: Respon
 
 export async function getNumberOfEnrollmentsByActivity(req: AuthenticatedRequest, res: Response) {
   const { userId } = req;
-  const { activityId } = req.params;
+  const activityId = Number(req.params.activityId);
 
-  if(!activityId) return res.sendStatus(httpStatus.BAD_REQUEST);
+  if(!activityId || isNaN(activityId)) return res.sendStatus(httpStatus.BAD_REQUEST);
 
   try {
     const numberOfEnrollments = await activitiesService.getNumberOfEnrollmentsByActivity(userId, Number(activityId));
