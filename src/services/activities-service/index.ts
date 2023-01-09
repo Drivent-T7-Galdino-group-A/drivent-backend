@@ -59,11 +59,30 @@ async function getActivitiesByDate(userId: number, date: string) {
   return activitiesOnDate;
 }
 
+async function getNumberOfEnrollmentsByActivity(userId: number, activityId: number) {
+  await checkEnrollmentAndTicket(userId);
+
+  const numberOfActivityTickets = (await activityRepository.findActivityTickets(activityId)).length;
+  if(numberOfActivityTickets === null) throw notFoundError();
+
+  return numberOfActivityTickets;
+}
+
+async function getActivityTickets(userId: number, activityId: number) {
+  await checkEnrollmentAndTicket(userId);
+
+  const activityTickets = await activityRepository.findActivityTickets(activityId);
+
+  return activityTickets;
+}
+
 const activitiesService = {
   checkEnrollmentAndTicket,
   getActivities,
   createActivity,
   getActivitiesByDate,
+  getNumberOfEnrollmentsByActivity,
+  getActivityTickets
 };
 
 export default activitiesService;
