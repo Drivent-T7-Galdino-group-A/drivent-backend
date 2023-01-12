@@ -22,11 +22,11 @@ async function cleanDb() {
   await prisma.booking.deleteMany({});
   await prisma.room.deleteMany({});
   await prisma.hotel.deleteMany({});
+  await prisma.activityTicket.deleteMany({});
   await prisma.ticket.deleteMany({});
   await prisma.ticketType.deleteMany({});
   await prisma.enrollment.deleteMany({});
   await prisma.user.deleteMany({});
-  await prisma.activityTicket.deleteMany({});
   await prisma.activity.deleteMany({});
   await prisma.localization.deleteMany({});
 }
