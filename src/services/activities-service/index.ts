@@ -1,4 +1,5 @@
 import activityRepository from "@/repositories/activity-repository";
+import activityCacheRepository from "@/repositories/activity-cache-repository";
 import enrollmentRepository from "@/repositories/enrollment-repository";
 import ticketRepository from "@/repositories/ticket-repository";
 import { cannotListActivitiesError, notFoundError, conflictError, cannotBookActivityError } from "@/errors";
@@ -20,8 +21,16 @@ async function checkEnrollmentAndTicket(userId: number) {
 async function getActivities(userId: number) {
   await checkEnrollmentAndTicket(userId);
 
-  const activities = await activityRepository.findActivities();
-  return activities;
+  const activitiesCache = await activityCacheRepository.getAllActivities();
+
+  if (!activitiesCache) {
+    const activities = await activityRepository.findActivities();
+    await activityCacheRepository.insertAllActivities(activities);
+
+    return activities;
+  }
+  
+  return JSON.parse(activitiesCache);
 }
 
 async function createActivity(userId: number, activityId: number) {
@@ -54,16 +63,23 @@ async function createActivity(userId: number, activityId: number) {
 async function getActivitiesByDate(userId: number, date: string) {
   await checkEnrollmentAndTicket(userId);
 
-  const activitiesOnDate = await activityRepository.findActivitiesByDate(date);
+  const activitiesOnDateCache = await activityCacheRepository.getActivitiesByDate(date);
 
-  return activitiesOnDate;
+  if (!activitiesOnDateCache) {
+    const activitiesOnDate = await activityRepository.findActivitiesByDate(date);
+    await activityCacheRepository.insertActivitiesByDate(date, activitiesOnDate);
+
+    return activitiesOnDate;
+  }
+
+  return JSON.parse(activitiesOnDateCache);
 }
 
 async function getNumberOfEnrollmentsByActivity(userId: number, activityId: number) {
   await checkEnrollmentAndTicket(userId);
 
   const numberOfActivityTickets = (await activityRepository.findActivityTickets(activityId)).length;
-  if(numberOfActivityTickets === null) throw notFoundError();
+  if (numberOfActivityTickets === null) throw notFoundError();
 
   return numberOfActivityTickets;
 }
@@ -82,7 +98,7 @@ const activitiesService = {
   createActivity,
   getActivitiesByDate,
   getNumberOfEnrollmentsByActivity,
-  getActivityTickets
+  getActivityTickets,
 };
 
 export default activitiesService;
