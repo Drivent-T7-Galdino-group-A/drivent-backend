@@ -1,5 +1,5 @@
 import { notFoundError, unauthorizedError } from "@/errors";
-import paymentRepository, { PaymentParams } from "@/repositories/payment-repository";
+import paymentRepository from "@/repositories/payment-repository";
 import ticketRepository from "@/repositories/ticket-repository";
 import enrollmentRepository from "@/repositories/enrollment-repository";
 
@@ -40,8 +40,6 @@ async function paymentProcess(ticketId: number, userId: number, cardData: CardPa
   };
 
   const payment = await paymentRepository.createPayment(ticketId, paymentData);
-
-  await ticketRepository.ticketProcessPayment(ticketId);
 
   return payment;
 }
